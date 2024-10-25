@@ -7,13 +7,13 @@ use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct Sphere {
-    center: Point3,
+    center: Vector3<f64>,
     radius: f64,
     mat: Rc<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: &Point3, radius: f64, mat: Rc<dyn Material>) -> Self {
+    pub fn new(center: &Vector3<f64>, radius: f64, mat: Rc<dyn Material>) -> Self {
         Self {
             center: center.clone(),
             radius: radius.max(0.0),
@@ -28,10 +28,10 @@ impl Hittable for Sphere {
         // where C = (Cx, Cy, Cz) and P = Q + d t
         // i.e. C is the sphere center and P is ray at origin Q with direction d
         // It is a quadratic equation that we further simplify with b = -2h
-        let oc = &self.center - r.orig();
-        let a = r.dir().length_squared();
-        let h = dot(r.dir(), &oc);
-        let c = oc.length_squared() - self.radius * self.radius;
+        let oc = self.center - r.orig();
+        let a = r.dir().norm_squared();
+        let h = r.dir().dot(&oc);
+        let c = oc.norm_squared() - self.radius * self.radius;
 
         let discriminant = h * h - a * c;
         if discriminant < 0.0 {

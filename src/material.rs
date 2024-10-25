@@ -5,7 +5,7 @@ pub trait Material {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Colour,
+        attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
         false
@@ -14,11 +14,11 @@ pub trait Material {
 
 #[derive(Clone)]
 pub struct Lambertian {
-    albedo: Colour,
+    albedo: Vector3<f64>,
 }
 
 impl Lambertian {
-    pub fn new(albedo: &Colour) -> Self {
+    pub fn new(albedo: &Vector3<f64>) -> Self {
         Self {
             albedo: albedo.clone(),
         }
@@ -30,12 +30,12 @@ impl Material for Lambertian {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Colour,
+        attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
         let mut scatter_direction = &rec.normal + &random_unit_vector();
 
-        if scatter_direction.near_zero() {
+        if near_zero(&scatter_direction) {
             scatter_direction = rec.normal.clone();
         }
 
@@ -47,12 +47,12 @@ impl Material for Lambertian {
 
 #[derive(Clone)]
 pub struct Metal {
-    albedo: Colour,
+    albedo: Vector3<f64>,
     fuzz: f64,
 }
 
 impl Metal {
-    pub fn new(albedo: &Colour, fuzz: f64) -> Self {
+    pub fn new(albedo: &Vector3<f64>, fuzz: f64) -> Self {
         Self {
             albedo: albedo.clone(),
             fuzz: if fuzz < 1.0 { fuzz } else { 1.0 },
@@ -65,14 +65,14 @@ impl Material for Metal {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Colour,
+        attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
         let reflected = reflect(&r_in.dir(), &rec.normal);
-        let reflected = &unit_vector(&reflected) + &(self.fuzz * &random_unit_vector());
+        let reflected = reflected.normalize() + self.fuzz * random_unit_vector();
         *scattered = Ray::new(&rec.p, &reflected);
         *attenuation = self.albedo.clone();
-        dot(scattered.dir(), &rec.normal) > 0.0
+        scattered.dir().dot(&rec.normal) > 0.0
     }
 }
 
@@ -100,18 +100,18 @@ impl Material for Dielectric {
         &self,
         r_in: &Ray,
         rec: &HitRecord,
-        attenuation: &mut Colour,
+        attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
-        *attenuation = Colour::new(1.0, 1.0, 1.0);
+        *attenuation = Vector3::new(1.0, 1.0, 1.0);
         let ri = if rec.front_face {
             1.0 / self.refraction_index
         } else {
             self.refraction_index
         };
 
-        let unit_direction = unit_vector(r_in.dir());
-        let cos_theta = dot(&-&unit_direction, &rec.normal).min(1.0);
+        let unit_direction = r_in.dir().normalize();
+        let cos_theta = (-unit_direction).dot(&rec.normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = ri * sin_theta > 1.0;

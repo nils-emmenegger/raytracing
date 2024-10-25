@@ -1,7 +1,5 @@
-use super::{Interval, Vec3};
+use super::{Interval, Vector3};
 use std::io::Write;
-
-pub type Colour = Vec3;
 
 fn linear_to_gamma(linear_component: f64) -> f64 {
     if linear_component > 0.0 {
@@ -11,11 +9,11 @@ fn linear_to_gamma(linear_component: f64) -> f64 {
     }
 }
 
-pub fn write_colour<T: Write>(mut out: T, pixel_colour: &Colour) {
+pub fn write_colour<T: Write>(mut out: T, pixel_colour: &Vector3<f64>) {
     // We assume that each of these is in [0, 1]
-    let r = pixel_colour.x();
-    let g = pixel_colour.y();
-    let b = pixel_colour.z();
+    let r = pixel_colour.x;
+    let g = pixel_colour.y;
+    let b = pixel_colour.z;
     debug_assert!((0.0..=1.0).contains(&r));
     debug_assert!((0.0..=1.0).contains(&g));
     debug_assert!((0.0..=1.0).contains(&b));
