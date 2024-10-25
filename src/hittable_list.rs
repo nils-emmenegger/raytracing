@@ -8,7 +8,7 @@ pub struct HittableList {
 
 impl HittableList {
     pub fn new(object: Rc<dyn Hittable>) -> Self {
-        let mut list = HittableList::default();
+        let mut list: HittableList = Default::default();
         list.add(object);
         list
     }
@@ -24,7 +24,7 @@ impl HittableList {
 
 impl Hittable for HittableList {
     fn hit(&self, r: &Ray, ray_t: Interval, rec: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord::default();
+        let mut temp_rec: HitRecord = Default::default();
         let mut hit_anything = false;
         let mut closest_so_far = ray_t.max;
 

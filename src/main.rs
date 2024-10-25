@@ -12,7 +12,7 @@ use rtweekend::*;
 use sphere::Sphere;
 
 fn main() {
-    let mut world = HittableList::default();
+    let mut world: HittableList = Default::default();
 
     let ground_material = Rc::new(Lambertian::new(&Vector3::new(0.5, 0.5, 0.5)));
     world.add(Rc::new(Sphere::new(
@@ -70,7 +70,7 @@ fn main() {
         material3,
     )));
 
-    let mut cam = Camera::default();
+    let mut cam: Camera = Default::default();
 
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 1200;

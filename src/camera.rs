@@ -152,7 +152,7 @@ impl Camera {
             return Vector3::new(0.0, 0.0, 0.0);
         }
 
-        let mut rec = HitRecord::default();
+        let mut rec: HitRecord = Default::default();
         if world.hit(r, Interval::new(0.001, INFINITY), &mut rec) {
             let mut scattered: Ray = Default::default();
             let mut attenuation: Vector3<f64> = Default::default();
