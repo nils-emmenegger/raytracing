@@ -7,9 +7,7 @@ pub trait Material {
         rec: &HitRecord,
         attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
-    ) -> bool {
-        false
-    }
+    ) -> bool;
 }
 
 #[derive(Clone)]
