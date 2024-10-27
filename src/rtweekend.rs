@@ -1,6 +1,8 @@
 // Reference-Pounting Pointer
-
 pub use std::rc::Rc;
+
+// Intervals
+pub type Interval = std::ops::Range<f64>;
 
 // Constants
 
@@ -32,11 +34,9 @@ pub fn random_double_in(min: f64, max: f64) -> f64 {
 // Common Headers
 
 mod colour;
-mod interval;
 mod ray;
 mod vec3;
 
 pub use colour::*;
-pub use interval::*;
 pub use ray::*;
 pub use vec3::*;

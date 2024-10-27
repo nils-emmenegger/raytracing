@@ -42,9 +42,9 @@ impl Hittable for Sphere {
 
         // find closest root in range
         let mut root = (h - sqrtd) / a;
-        if !ray_t.surrounds(root) {
+        if !ray_t.contains(&root) {
             root = (h + sqrtd) / a;
-            if !ray_t.surrounds(root) {
+            if !ray_t.contains(&root) {
                 return false;
             }
         }
