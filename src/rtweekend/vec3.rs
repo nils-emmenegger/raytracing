@@ -7,10 +7,12 @@ pub fn near_zero(v: &Vector3<f64>) -> bool {
     v.iter().all(|&x| x.abs() < S)
 }
 
+/// Returns a random vector with each component in [0, 1)
 pub fn random() -> Vector3<f64> {
     Vector3::new(random_double(), random_double(), random_double())
 }
 
+/// Returns a random vector with each component in [min, max)
 pub fn random_in(min: f64, max: f64) -> Vector3<f64> {
     Vector3::new(
         random_double_in(min, max),
