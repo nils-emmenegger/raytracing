@@ -11,11 +11,11 @@ pub struct HitRecord {
 }
 
 impl HitRecord {
-    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: &Vector3<f64>) {
+    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vector3<f64>) {
         // outward_normal is assumed to have unit length
-        self.front_face = r.dir().dot(outward_normal) < 0.0;
+        self.front_face = r.dir().dot(&outward_normal) < 0.0;
         self.normal = if self.front_face {
-            outward_normal.clone()
+            outward_normal
         } else {
             -outward_normal
         }

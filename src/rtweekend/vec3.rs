@@ -2,7 +2,7 @@ use super::{random_double, random_double_in};
 
 pub use nalgebra::Vector3;
 
-pub fn near_zero(v: &Vector3<f64>) -> bool {
+pub fn near_zero(v: Vector3<f64>) -> bool {
     const S: f64 = 1e-8;
     v.iter().all(|&x| x.abs() < S)
 }
@@ -39,27 +39,27 @@ pub fn random_unit_vector() -> Vector3<f64> {
         let p = random_in(-1.0, 1.0);
         let lensq = p.norm_squared();
         if 1e-160 < lensq && lensq <= 1.0 {
-            return &p / lensq.sqrt();
+            return p / lensq.sqrt();
         }
     }
 }
 
-pub fn random_on_hemisphere(normal: &Vector3<f64>) -> Vector3<f64> {
+pub fn random_on_hemisphere(normal: Vector3<f64>) -> Vector3<f64> {
     let on_unit_sphere = random_unit_vector();
-    if on_unit_sphere.dot(normal) > 0.0 {
+    if on_unit_sphere.dot(&normal) > 0.0 {
         on_unit_sphere
     } else {
-        -&on_unit_sphere
+        -on_unit_sphere
     }
 }
 
-pub fn reflect(v: &Vector3<f64>, n: &Vector3<f64>) -> Vector3<f64> {
-    v - &(2.0 * v.dot(n) * n)
+pub fn reflect(v: Vector3<f64>, n: Vector3<f64>) -> Vector3<f64> {
+    v - (2.0 * v.dot(&n)) * n
 }
 
-pub fn refract(uv: &Vector3<f64>, n: &Vector3<f64>, etai_over_etat: f64) -> Vector3<f64> {
-    let cos_theta = (-uv).dot(n).min(1.0);
-    let r_out_perp = etai_over_etat * &(uv + &(cos_theta * n));
+pub fn refract(uv: Vector3<f64>, n: Vector3<f64>, etai_over_etat: f64) -> Vector3<f64> {
+    let cos_theta = (-uv.dot(&n)).min(1.0);
+    let r_out_perp = etai_over_etat * (uv + cos_theta * n);
     let r_out_parallel = -(1.0 - r_out_perp.norm_squared()).abs().sqrt() * n;
-    &r_out_perp + &r_out_parallel
+    r_out_perp + r_out_parallel
 }

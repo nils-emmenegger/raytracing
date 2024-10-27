@@ -16,10 +16,8 @@ pub struct Lambertian {
 }
 
 impl Lambertian {
-    pub fn new(albedo: &Vector3<f64>) -> Self {
-        Self {
-            albedo: albedo.clone(),
-        }
+    pub fn new(albedo: Vector3<f64>) -> Self {
+        Self { albedo }
     }
 }
 
@@ -31,14 +29,14 @@ impl Material for Lambertian {
         attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
-        let mut scatter_direction = &rec.normal + &random_unit_vector();
+        let mut scatter_direction = rec.normal + random_unit_vector();
 
-        if near_zero(&scatter_direction) {
-            scatter_direction = rec.normal.clone();
+        if near_zero(scatter_direction) {
+            scatter_direction = rec.normal;
         }
 
-        *scattered = Ray::new(&rec.p, &scatter_direction);
-        *attenuation = self.albedo.clone();
+        *scattered = Ray::new(rec.p, scatter_direction);
+        *attenuation = self.albedo;
         true
     }
 }
@@ -50,9 +48,9 @@ pub struct Metal {
 }
 
 impl Metal {
-    pub fn new(albedo: &Vector3<f64>, fuzz: f64) -> Self {
+    pub fn new(albedo: Vector3<f64>, fuzz: f64) -> Self {
         Self {
-            albedo: albedo.clone(),
+            albedo,
             fuzz: if fuzz < 1.0 { fuzz } else { 1.0 },
         }
     }
@@ -66,10 +64,10 @@ impl Material for Metal {
         attenuation: &mut Vector3<f64>,
         scattered: &mut Ray,
     ) -> bool {
-        let reflected = reflect(&r_in.dir(), &rec.normal);
+        let reflected = reflect(r_in.dir(), rec.normal);
         let reflected = reflected.normalize() + self.fuzz * random_unit_vector();
-        *scattered = Ray::new(&rec.p, &reflected);
-        *attenuation = self.albedo.clone();
+        *scattered = Ray::new(rec.p, reflected);
+        *attenuation = self.albedo;
         scattered.dir().dot(&rec.normal) > 0.0
     }
 }
@@ -109,18 +107,18 @@ impl Material for Dielectric {
         };
 
         let unit_direction = r_in.dir().normalize();
-        let cos_theta = (-unit_direction).dot(&rec.normal).min(1.0);
+        let cos_theta = -unit_direction.dot(&rec.normal).min(1.0);
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = ri * sin_theta > 1.0;
         let direction =
             if cannot_refract || Dielectric::reflectance(cos_theta, ri) > random_double() {
-                reflect(&unit_direction, &rec.normal)
+                reflect(unit_direction, rec.normal)
             } else {
-                refract(&unit_direction, &rec.normal, ri)
+                refract(unit_direction, rec.normal, ri)
             };
 
-        *scattered = Ray::new(&rec.p, &direction);
+        *scattered = Ray::new(rec.p, direction);
         true
     }
 }

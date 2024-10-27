@@ -14,7 +14,7 @@ fn clamp_intensity(x: f64) -> f64 {
     x.clamp(0.0, 0.999)
 }
 
-pub fn write_colour<T: Write>(mut out: T, pixel_colour: &Vector3<f64>) {
+pub fn write_colour<T: Write>(mut out: T, pixel_colour: Vector3<f64>) {
     // We assume that each of these is in [0, 1]
     let r = pixel_colour.x;
     let g = pixel_colour.y;

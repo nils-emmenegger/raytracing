@@ -74,7 +74,7 @@ impl Camera {
                 }
                 write_colour(
                     std::io::stdout().lock(),
-                    &(self.pixel_samples_scale * &pixel_colour),
+                    self.pixel_samples_scale * pixel_colour,
                 );
             }
         }
@@ -92,7 +92,7 @@ impl Camera {
 
         self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
 
-        self.center = self.lookfrom.clone();
+        self.center = self.lookfrom;
 
         let theta = degrees_to_radians(self.vfov);
         let h = (theta / 2.0).tan();
@@ -106,20 +106,19 @@ impl Camera {
         self.v = self.w.cross(&self.u);
         self.v.normalize_mut();
 
-        let viewport_u = viewport_width * &self.u;
-        let viewport_v = viewport_height * &-&self.v;
+        let viewport_u = viewport_width * self.u;
+        let viewport_v = -viewport_height * self.v;
 
-        self.pixel_delta_u = &viewport_u / self.image_width as f64;
-        self.pixel_delta_v = &viewport_v / self.image_height as f64;
+        self.pixel_delta_u = viewport_u / self.image_width as f64;
+        self.pixel_delta_v = viewport_v / self.image_height as f64;
 
         let viewport_upper_left =
-            &(&self.center - &(self.focus_dist * &self.w)) - &(0.5 * &(&viewport_u + &viewport_v));
-        self.pixel00_loc =
-            &viewport_upper_left + &(0.5 * &(&self.pixel_delta_u + &self.pixel_delta_v));
+            self.center - self.focus_dist * self.w - 0.5 * (viewport_u + viewport_v);
+        self.pixel00_loc = viewport_upper_left + 0.5 * (self.pixel_delta_u + self.pixel_delta_v);
 
-        let defocus_radius = self.focus_dist * (degrees_to_radians(self.defocus_angle / 2.0)).tan();
-        self.defocus_disk_u = &self.u * defocus_radius;
-        self.defocus_disk_v = &self.v * defocus_radius;
+        let defocus_radius = self.focus_dist * degrees_to_radians(self.defocus_angle / 2.0).tan();
+        self.defocus_disk_u = self.u * defocus_radius;
+        self.defocus_disk_v = self.v * defocus_radius;
     }
 
     fn get_ray(&self, i: i32, j: i32) -> Ray {
@@ -129,13 +128,13 @@ impl Camera {
             + (j as f64 + offset.y) * self.pixel_delta_v;
 
         let ray_origin = if self.defocus_angle <= 0.0 {
-            self.center.clone()
+            self.center
         } else {
             self.defocus_disk_sample()
         };
-        let ray_direction = &pixel_sample - &ray_origin;
+        let ray_direction = pixel_sample - ray_origin;
 
-        Ray::new(&ray_origin, &ray_direction)
+        Ray::new(ray_origin, ray_direction)
     }
 
     fn sample_square() -> Vector3<f64> {
@@ -144,7 +143,7 @@ impl Camera {
 
     fn defocus_disk_sample(&self) -> Vector3<f64> {
         let p = random_in_unit_disk();
-        &(&self.center + &(p[0] * &self.defocus_disk_u)) + &(p[1] * &self.defocus_disk_v)
+        self.center + p.x * self.defocus_disk_u + p.y * self.defocus_disk_v
     }
 
     fn ray_colour(r: &Ray, depth: i32, world: &dyn Hittable) -> Vector3<f64> {
@@ -168,8 +167,9 @@ impl Camera {
             }
         }
 
-        let unit_direction = r.dir().normalize();
+        let mut unit_direction = r.dir();
+        unit_direction.normalize_mut();
         let a = 0.5 * (unit_direction.y + 1.0);
-        &((1.0 - a) * &Vector3::new(1.0, 1.0, 1.0)) + &(a * &Vector3::new(0.5, 0.7, 1.0))
+        (1.0 - a) * Vector3::new(1.0, 1.0, 1.0) + a * Vector3::new(0.5, 0.7, 1.0)
     }
 }
