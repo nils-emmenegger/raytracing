@@ -1,27 +1,41 @@
 use crate::{material::Material, rtweekend::*};
 use std::rc::Rc;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct HitRecord {
-    pub p: Vector3<f64>,
-    pub normal: Vector3<f64>,
-    pub mat: Option<Rc<dyn Material>>,
     pub t: f64,
+    pub p: Vector3<f64>,
     pub front_face: bool,
+    pub normal: Vector3<f64>,
+    pub mat: Rc<dyn Material>,
 }
 
 impl HitRecord {
-    pub fn set_face_normal(&mut self, r: &Ray, outward_normal: Vector3<f64>) {
-        // outward_normal is assumed to have unit length
-        self.front_face = r.dir().dot(&outward_normal) < 0.0;
-        self.normal = if self.front_face {
+    /// The normal in the returned HitRecord will always point against the incident Ray (it will flip outward_normal if needed)
+    pub fn new(
+        time_of_intersection: f64,
+        intersection_point: Vector3<f64>,
+        incident_ray: &Ray,
+        outward_normal: Vector3<f64>,
+        mat: Rc<dyn Material>,
+    ) -> Self {
+        let front_face = incident_ray.dir().dot(&outward_normal) < 0.0;
+        let normal = if front_face {
             outward_normal
         } else {
             -outward_normal
+        };
+
+        Self {
+            t: time_of_intersection,
+            p: intersection_point,
+            front_face,
+            normal,
+            mat,
         }
     }
 }
 
 pub trait Hittable {
-    fn hit(&self, r: &Ray, ray_t: Interval, rec: &mut HitRecord) -> bool;
+    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord>;
 }

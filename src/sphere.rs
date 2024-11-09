@@ -23,7 +23,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, r: &Ray, ray_t: Interval, rec: &mut HitRecord) -> bool {
+    fn hit(&self, r: &Ray, ray_t: Interval) -> Option<HitRecord> {
         // Derive from (C - P) * (C - P) = r^2
         // where C = (Cx, Cy, Cz) and P = Q + d t
         // i.e. C is the sphere center and P is ray at origin Q with direction d
@@ -35,7 +35,7 @@ impl Hittable for Sphere {
 
         let discriminant = h * h - a * c;
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
 
         let sqrtd = discriminant.sqrt();
@@ -45,16 +45,18 @@ impl Hittable for Sphere {
         if !ray_t.contains(&root) {
             root = (h + sqrtd) / a;
             if !ray_t.contains(&root) {
-                return false;
+                return None;
             }
         }
 
-        rec.t = root;
-        rec.p = r.at(rec.t);
-        let outward_normal = (rec.p - self.center) / self.radius;
-        rec.set_face_normal(r, outward_normal);
-        rec.mat = Some(Rc::clone(&self.mat));
-
-        true
+        let intersection_point = r.at(root);
+        let outward_normal = (intersection_point - self.center) / self.radius;
+        Some(HitRecord::new(
+            root,
+            intersection_point,
+            r,
+            outward_normal,
+            Rc::clone(&self.mat),
+        ))
     }
 }
