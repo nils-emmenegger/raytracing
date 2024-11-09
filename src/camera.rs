@@ -1,5 +1,6 @@
 use crate::{
     hittable::{HitRecord, Hittable},
+    material::Scattering,
     rtweekend::*,
 };
 
@@ -152,9 +153,11 @@ impl Camera {
         }
 
         if let Some(rec) = world.hit(r, 0.001..INFINITY) {
-            let mut scattered: Ray = Default::default();
-            let mut attenuation: Vector3<f64> = Default::default();
-            if rec.mat.scatter(r, &rec, &mut attenuation, &mut scattered) {
+            if let Some(Scattering {
+                scattered,
+                attenuation,
+            }) = rec.mat.scatter(r, &rec)
+            {
                 return attenuation.component_mul(&Self::ray_colour(&scattered, depth - 1, world));
             } else {
                 return Vector3::new(0.0, 0.0, 0.0);
