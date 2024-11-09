@@ -1,8 +1,4 @@
-use crate::{
-    hittable::{HitRecord, Hittable},
-    material::Scattering,
-    rtweekend::*,
-};
+use crate::{hittable::Hittable, material::Scattering, rtweekend::*};
 
 #[derive(Clone, Debug)]
 pub struct Camera {
