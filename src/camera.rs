@@ -6,8 +6,8 @@ use crate::{
 
 #[derive(Clone, Debug)]
 pub struct Camera {
-    pub aspect_ratio: f64,
     pub image_width: i32,
+    pub image_height: i32,
     pub samples_per_pixel: i32,
     pub max_depth: i32,
     pub vfov: f64,
@@ -16,7 +16,6 @@ pub struct Camera {
     pub vup: Vector3<f64>,
     pub defocus_angle: f64,
     pub focus_dist: f64,
-    image_height: i32,
     pixel_samples_scale: f64,
     center: Vector3<f64>,
     pixel00_loc: Vector3<f64>,
@@ -32,8 +31,8 @@ pub struct Camera {
 impl Default for Camera {
     fn default() -> Self {
         Self {
-            aspect_ratio: 1.0,
             image_width: 100,
+            image_height: 100,
             samples_per_pixel: 10,
             max_depth: 10,
             vfov: 90.0,
@@ -42,7 +41,6 @@ impl Default for Camera {
             vup: Vector3::new(0.0, 1.0, 0.0),
             defocus_angle: 0.0,
             focus_dist: 10.0,
-            image_height: Default::default(),
             pixel_samples_scale: Default::default(),
             center: Default::default(),
             pixel00_loc: Default::default(),
@@ -83,13 +81,8 @@ impl Camera {
     }
 
     fn initialize(&mut self) {
-        self.image_height =
-            unsafe { (self.image_width as f64 / self.aspect_ratio).to_int_unchecked() };
-        self.image_height = if self.image_height < 1 {
-            1
-        } else {
-            self.image_height
-        };
+        assert!(self.image_height.is_positive());
+        assert!(self.image_width.is_positive());
 
         self.pixel_samples_scale = 1.0 / self.samples_per_pixel as f64;
 
