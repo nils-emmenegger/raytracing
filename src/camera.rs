@@ -1,21 +1,12 @@
 use crate::{hittable::Hittable, material::Scattering, rtweekend::*};
 
-#[derive(Default)]
-pub struct CameraBuilder {
-    image_width: Option<i32>,
-    image_height: Option<i32>,
-    samples_per_pixel: Option<i32>,
-    max_depth: Option<i32>,
-    vfov: Option<f64>,
-    lookfrom: Option<Vector3<f64>>,
-    lookat: Option<Vector3<f64>>,
-    vup: Option<Vector3<f64>>,
-    defocus_angle: Option<f64>,
-    focus_dist: Option<f64>,
-}
-
-macro_rules! impl_setter {
+macro_rules! create_builder {
     ($struct_name:ident, $(($field:ident, $field_type:ty)),+) => {
+        #[derive(Default)]
+        pub struct $struct_name {
+            $($field: Option<$field_type>),+
+        }
+
         impl $struct_name {
             $(
                 pub fn $field(&mut self, $field: $field_type) -> &mut Self {
@@ -27,7 +18,7 @@ macro_rules! impl_setter {
     };
 }
 
-impl_setter!(
+create_builder!(
     CameraBuilder,
     (image_width, i32),
     (image_height, i32),
