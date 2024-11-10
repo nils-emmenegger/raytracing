@@ -5,7 +5,7 @@ mod material;
 mod rtweekend;
 mod sphere;
 
-use camera::Camera;
+use camera::CameraBuilder;
 use hittable_list::HittableList;
 use material::{Dielectric, Lambertian, Material, Metal};
 use rtweekend::*;
@@ -70,20 +70,18 @@ fn main() {
         material3,
     )));
 
-    let mut cam: Camera = Default::default();
-
-    cam.image_width = 400;
-    cam.image_height = 225;
-    cam.samples_per_pixel = 10;
-    cam.max_depth = 50;
-
-    cam.vfov = 20.0;
-    cam.lookfrom = Vector3::new(13.0, 2.0, 3.0);
-    cam.lookat = Vector3::new(0.0, 0.0, 0.0);
-    cam.vup = Vector3::new(0.0, 1.0, 0.0);
-
-    cam.defocus_angle = 0.6;
-    cam.focus_dist = 10.0;
+    let cam = CameraBuilder::default()
+        .image_width(400)
+        .image_height(225)
+        .samples_per_pixel(10)
+        .max_depth(50)
+        .vfov(20.0)
+        .lookfrom(Vector3::new(13.0, 2.0, 3.0))
+        .lookat(Vector3::new(0.0, 0.0, 0.0))
+        .vup(Vector3::new(0.0, 1.0, 0.0))
+        .defocus_angle(0.6)
+        .focus_dist(10.0)
+        .build();
 
     cam.render(&world);
 }
