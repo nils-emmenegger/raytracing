@@ -1,5 +1,6 @@
 use crate::{hittable::Hittable, material::Scattering, rtweekend::*};
 use rayon::prelude::*;
+use std::io::stdout;
 
 macro_rules! create_builder {
     ($struct_name:ident, $(($field:ident, $field_type:ty)),+) => {
@@ -138,9 +139,10 @@ impl Camera {
             })
             .collect();
 
+        let mut stdout_lock = stdout().lock();
         for row in output.into_iter() {
             for column in row.into_iter() {
-                write_colour(std::io::stdout().lock(), column);
+                write_colour(&mut stdout_lock, column);
             }
         }
     }
@@ -150,6 +152,7 @@ impl Camera {
         println!("{} {}", self.image_width, self.image_height);
         println!("255");
 
+        let mut stdout_lock = stdout().lock();
         for j in 0..self.image_height {
             eprint!("\rScanlines remaining: {} ", self.image_height - j);
             for i in 0..self.image_width {
@@ -158,10 +161,7 @@ impl Camera {
                     let r = self.get_ray(i, j);
                     pixel_colour += Camera::ray_colour(&r, self.max_depth, world);
                 }
-                write_colour(
-                    std::io::stdout().lock(),
-                    self.pixel_samples_scale * pixel_colour,
-                );
+                write_colour(&mut stdout_lock, self.pixel_samples_scale * pixel_colour);
             }
         }
         eprintln!("\rDone.                 ");
