@@ -1,4 +1,5 @@
 use crate::{hittable::Hittable, material::Scattering, rtweekend::*};
+use rayon::prelude::*;
 
 macro_rules! create_builder {
     ($struct_name:ident, $(($field:ident, $field_type:ty)),+) => {
@@ -116,7 +117,35 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn render(&self, world: &dyn Hittable) {
+    pub fn multi_threaded_render(&self, world: &(dyn Hittable + Sync)) {
+        println!("P3");
+        println!("{} {}", self.image_width, self.image_height);
+        println!("255");
+
+        let output: Vec<Vec<Vector3<f64>>> = (0..self.image_height)
+            .into_par_iter()
+            .map(|j| {
+                (0..self.image_width)
+                    .map(|i| {
+                        let mut pixel_colour = Vector3::new(0.0, 0.0, 0.0);
+                        for _sample in 0..self.samples_per_pixel {
+                            let r = self.get_ray(i, j);
+                            pixel_colour += Camera::ray_colour(&r, self.max_depth, world);
+                        }
+                        self.pixel_samples_scale * pixel_colour
+                    })
+                    .collect()
+            })
+            .collect();
+
+        for row in output.into_iter() {
+            for column in row.into_iter() {
+                write_colour(std::io::stdout().lock(), column);
+            }
+        }
+    }
+
+    pub fn single_threaded_render(&self, world: &dyn Hittable) {
         println!("P3");
         println!("{} {}", self.image_width, self.image_height);
         println!("255");

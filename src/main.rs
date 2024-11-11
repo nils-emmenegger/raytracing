@@ -14,8 +14,8 @@ use sphere::Sphere;
 fn main() {
     let mut world: HittableList = Default::default();
 
-    let ground_material = Rc::new(Lambertian::new(Vector3::new(0.5, 0.5, 0.5)));
-    world.add(Rc::new(Sphere::new(
+    let ground_material = Arc::new(Lambertian::new(Vector3::new(0.5, 0.5, 0.5)));
+    world.add(Arc::new(Sphere::new(
         Vector3::new(0.0, -1000.0, 0.0),
         1000.0,
         ground_material,
@@ -31,40 +31,40 @@ fn main() {
             );
 
             if (center - Vector3::new(4.0, 0.2, 0.0)).norm() > 0.9 {
-                let sphere_material: Rc<dyn Material> = if choose_mat < 0.8 {
+                let sphere_material: Arc<dyn Material + Send + Sync> = if choose_mat < 0.8 {
                     // diffuse
                     let albedo = random().component_mul(&random());
-                    Rc::new(Lambertian::new(albedo))
+                    Arc::new(Lambertian::new(albedo))
                 } else if choose_mat < 0.95 {
                     // metal
                     let albedo = random_in(0.5, 1.0);
                     let fuzz = random_double_in(0.0, 0.5);
-                    Rc::new(Metal::new(albedo, fuzz))
+                    Arc::new(Metal::new(albedo, fuzz))
                 } else {
                     // glass
-                    Rc::new(Dielectric::new(1.5))
+                    Arc::new(Dielectric::new(1.5))
                 };
-                world.add(Rc::new(Sphere::new(center, 0.2, sphere_material)));
+                world.add(Arc::new(Sphere::new(center, 0.2, sphere_material)));
             }
         }
     }
 
-    let material1 = Rc::new(Dielectric::new(1.5));
-    world.add(Rc::new(Sphere::new(
+    let material1 = Arc::new(Dielectric::new(1.5));
+    world.add(Arc::new(Sphere::new(
         Vector3::new(0.0, 1.0, 0.0),
         1.0,
         material1,
     )));
 
-    let material2 = Rc::new(Lambertian::new(Vector3::new(0.4, 0.2, 0.1)));
-    world.add(Rc::new(Sphere::new(
+    let material2 = Arc::new(Lambertian::new(Vector3::new(0.4, 0.2, 0.1)));
+    world.add(Arc::new(Sphere::new(
         Vector3::new(-4.0, 1.0, 0.0),
         1.0,
         material2,
     )));
 
-    let material3 = Rc::new(Metal::new(Vector3::new(0.7, 0.6, 0.5), 0.0));
-    world.add(Rc::new(Sphere::new(
+    let material3 = Arc::new(Metal::new(Vector3::new(0.7, 0.6, 0.5), 0.0));
+    world.add(Arc::new(Sphere::new(
         Vector3::new(4.0, 1.0, 0.0),
         1.0,
         material3,
@@ -83,5 +83,5 @@ fn main() {
         .focus_dist(10.0)
         .build();
 
-    cam.render(&world);
+    cam.multi_threaded_render(&world);
 }

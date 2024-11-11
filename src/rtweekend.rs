@@ -1,5 +1,5 @@
-// Reference-Pounting Pointer
-pub use std::rc::Rc;
+// Atomic Reference-Counting Pointer
+pub use std::sync::Arc;
 
 // Intervals
 pub type Interval = std::ops::Range<f64>;
@@ -21,7 +21,7 @@ pub fn random_double() -> f64 {
     use rand_xoshiro::Xoshiro256Plus;
     use std::cell::RefCell;
 
-    thread_local!(static RNG: RefCell<Xoshiro256Plus> = RefCell::new(Xoshiro256Plus::seed_from_u64(1)));
+    thread_local!(static RNG: RefCell<Xoshiro256Plus> = RefCell::new(Xoshiro256Plus::from_entropy()));
 
     RNG.with_borrow_mut(|rng| rng.gen::<f64>())
 }

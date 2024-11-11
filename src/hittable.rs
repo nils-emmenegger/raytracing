@@ -1,5 +1,4 @@
 use crate::{material::Material, rtweekend::*};
-use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct HitRecord {
@@ -7,7 +6,7 @@ pub struct HitRecord {
     pub p: Vector3<f64>,
     pub front_face: bool,
     pub normal: Vector3<f64>,
-    pub mat: Rc<dyn Material>,
+    pub mat: Arc<dyn Material + Send + Sync>,
 }
 
 impl HitRecord {
@@ -17,7 +16,7 @@ impl HitRecord {
         intersection_point: Vector3<f64>,
         incident_ray: &Ray,
         outward_normal: Vector3<f64>,
-        mat: Rc<dyn Material>,
+        mat: Arc<dyn Material + Send + Sync>,
     ) -> Self {
         let front_face = incident_ray.dir().dot(&outward_normal) < 0.0;
         let normal = if front_face {
